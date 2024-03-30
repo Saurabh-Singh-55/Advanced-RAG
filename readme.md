@@ -125,7 +125,7 @@ This question assesses the ability to synthesize knowledge from multiple researc
 - Role of immediate autologous reconstruction in aggressive melanomas.
 - Incorporating frozen section analyses in head and neck melanomas.
 
-## LLM Response
+## RAG + LLM Response
 The LLM provided a response:
 
 **Introduction:**
@@ -161,7 +161,7 @@ The integration of oncoplastic surgery principles into melanoma treatment strate
 In conclusion, the principles of oncoplastic surgery enhance outcomes by harmonizing oncological rigor with reconstructive finesse, all while placing a premium on patient preferences and psychological impact. This holistic approach to melanoma management—balancing tumor control with functional and aesthetic restoration and underpinned by precise intraoperative pathological assessment—embodies the evolution of contemporary surgical oncology.
 
 ## Comparison Table
-Criteria | LLM Response | Expert Response
+Criteria | RAG+LLM Response | Expert Response
 --- | --- | ---
 Psychological Impact | Acknowledges impact on well-being. | Emphasizes satisfaction and quality of life.
 Diagnostic Complexity | Stresses multidisciplinary decision-making. | Advocates for a proactive approach.
@@ -169,7 +169,7 @@ Reconstructive Outcomes | Suggests direct impact on survival. | Notes psychologi
 Surgical Precision | Highlights immediate pathological feedback. | Considers real-time assessment crucial.
 
 ## Final Analysis
-Both the LLM and expert responses provided valuable insights, with the LLM focusing on the procedural aspects and the expert highlighting the holistic and patient-centric elements of care. The 'better' response depends on whether the emphasis is on patient-centered care or technical outcomes.
+Both the RAG+LLM and expert responses provided valuable insights, with the LLM focusing on the procedural aspects and the expert highlighting the holistic and patient-centric elements of care. The 'better' response depends on whether the emphasis is on patient-centered care or technical outcomes.
 
 ## Conclusion
 The experiment showcased the capabilities of an LLM in generating comprehensive and analytical responses to complex medical queries and the importance of expert oversight in evaluating and integrating these responses into clinical practice.
