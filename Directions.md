@@ -58,7 +58,7 @@ To craft a sophisticated RAG system, especially for the domain of medical resear
 
 5. **Data Processing Spectrum**: Addressing the full spectrum of data handling, from the initial ingestion of raw data to employing advanced methodologies like RAPTOR for improved retrieval and reasoning. This includes strategies for document hierarchies, vector database retrieval, and the employment of chunking strategies to optimize model performance.
 
-![LLaMa Weights Memory Requirements](./Images/Rag.png "Naive vs Advanced RAG vs Fine-tuning")
+![LLaMa Weights Memory Requirements](./Images/rag.png "Naive vs Advanced RAG vs Fine-tuning")
 
 Each direction underscores the multifaceted approach required to develop a robust and effective RAG system for medical research, aiming to enhance the accessibility, comprehension, and utility of vast data corpuses through cutting-edge AI and information retrieval technologies.
 
