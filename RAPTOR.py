@@ -1,7 +1,29 @@
 RANDOM_SEED = 224  # Fixed seed for reproducibility
 
-### --- Code from citations referenced above (added comments and docstrings) --- ###
 
+### --- Code from citations referenced above (added comments and docstrings) --- ###
+# General utility and data handling
+from typing import Dict, List, Optional, Tuple
+import numpy as np
+import pandas as pd
+import os
+
+# UMAP for dimensionality reduction
+import umap
+
+# Gaussian Mixture Model for clustering
+from sklearn.mixture import GaussianMixture
+from langchain.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+
+# Initialize the embeddings and model
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+
+os.environ[''] = ""  # OpenAI API Key
+embd = OpenAIEmbeddings()
+model = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
 
 def global_cluster_embeddings(
     embeddings: np.ndarray,
@@ -264,17 +286,18 @@ def embed_cluster_summarize_texts(
     print(f"--Generated {len(all_clusters)} clusters--")
 
     # Summarization
-    template = """Here is a sub-set of LangChain Expression Langauge doc.
+    template = """Here is a sub-set of a medical research paper.
 
-    LangChain Expression Langauge provides a way to compose chain in LangChain.
+    This paper provides valuable insights into the latest findings in medical research.
 
-    Give a detailed summary of the documentation provided.
+    Give a detailed summary of the research document provided.
 
-    Documentation:
+    Document:
     {context}
     """
     prompt = ChatPromptTemplate.from_template(template)
     chain = prompt | model | StrOutputParser()
+
 
     # Format text within each cluster for summarization
     summaries = []

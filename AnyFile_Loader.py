@@ -1,3 +1,22 @@
+from typing import Dict, List, Optional, Tuple
+import glob
+import os
+from langchain.docstore.document import Document
+from multiprocessing import Pool
+from langchain_community.document_loaders import (
+    CSVLoader,
+    EverNoteLoader,
+    PyMuPDFLoader,
+    TextLoader,
+    UnstructuredEmailLoader,
+    UnstructuredEPubLoader,
+    UnstructuredHTMLLoader,
+    UnstructuredMarkdownLoader,
+    UnstructuredODTLoader,
+    UnstructuredPowerPointLoader,
+    UnstructuredWordDocumentLoader,
+)
+
 # Define custom loader mapping with file extensions and corresponding loader classes
 LOADER_MAPPING = {
     ".csv": (CSVLoader, {}),
