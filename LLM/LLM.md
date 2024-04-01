@@ -4,7 +4,7 @@
 
 An LLM (Large Language Model) is a type of AI that processes and generates text, built on a transformer architecture and trained with massive amounts of data to understand and mimic human language patterns.
 
-## what are Tansformers?
+## what are Transformers?
 
 The transformer architecture was introduced in the paper “[Attention is all you need](https://arxiv.org/pdf/1706.03762.pdf),” published in December 2017.
 
@@ -25,6 +25,7 @@ In a neural network, each neuron in each layer has its weight for every connecti
 
 HumanEval usually get about the same performance from 4 bpw models as from FP16, i.e. they're not any worse at producing functioning Python code, and so for that particular type of reasoning task there's no *measurable* benefit from more precision than 4 bpw, at least with a relatively conservative top-P threshold of 0.8.
 Base-Model Parameter count is by far the strongest indicator of how smart a model can possibly be.
+
 
 ## what is context window size?
 

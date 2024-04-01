@@ -11,3 +11,5 @@ PyMuPDF==1.23.5
 pandas
 Numpy
 matplotlib
+ollama
+streamlit

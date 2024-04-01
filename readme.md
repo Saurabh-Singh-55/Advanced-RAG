@@ -61,6 +61,8 @@ Since the Vector Embedding are already stored it is recommeded to use `--no-upda
 python .\RAG_OpenAI_Raptor.py --no-update
 ```
 To update the files (stored in ./Melanoma_Papers)and create a new VectorStore:
+Make sure your files are present in `Melanoma_Papers` folder then run:
+
 ```
 python .\RAG_OpenAI_Raptor.py --update
 ```
