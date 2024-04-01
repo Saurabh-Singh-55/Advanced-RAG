@@ -51,6 +51,7 @@ def load_single_document(file_path: str) -> List[Document]:
         return loader.load()
     raise ValueError(f"Unsupported file extension '{ext}'")
 
+    
 def load_documents(source_dir: str, ignored_files: List[str] = []) -> List[Document]:
     """
     Load documents from a specified directory, filtering out ignored files.
@@ -66,12 +67,16 @@ def load_documents(source_dir: str, ignored_files: List[str] = []) -> List[Docum
     for ext in LOADER_MAPPING.keys():
         all_files.extend(glob.glob(os.path.join(source_dir, f"**/*{ext}"), recursive=True))
 
+
     # Filter out ignored files
     filtered_files = [file_path for file_path in all_files if file_path not in ignored_files]
 
     documents = []
-    with Pool(processes=os.cpu_count()) as pool:
-        for docs in pool.imap_unordered(load_single_document, filtered_files):
+    for file_path in filtered_files:
+        try:
+            docs = load_single_document(file_path)
             documents.extend(docs)
+        except Exception as e:
+            print(f"Error loading document from {file_path}: {e}")
 
     return documents
