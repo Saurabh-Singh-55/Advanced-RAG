@@ -22,6 +22,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 
 # os.environ[] =  # OpenAI API Key
+os.environ[''] = '' # OpenAI API Key
 embd = OpenAIEmbeddings()
 model = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
 

@@ -8,9 +8,9 @@ from RAPTOR import *
 from AnyFile_Loader import *
 from langchain_community.chat_models import ChatOllama
 
-# os.environ[''] = 'API_KEY' # OpenAI API Key
-# embd = OpenAIEmbeddings()
-# model = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
+os.environ[''] = '' # OpenAI API Key
+embd = OpenAIEmbeddings()
+model = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
 
 def process_documents(source_directory: str, ignored_files: List[str] = []) -> List[str]:
     print("="*30)
@@ -38,9 +38,9 @@ def build_vectorstore_with_summaries(texts: List[str], n_levels: int = 3) -> Chr
     print("="*30)
     return vectorstore
 
-def setup_ollama_language_model_chain(vectorstore: Chroma, LLM_name: str):
+def setup_ollama_language_model_chain(vectorstore: Chroma, LLM_name: str, topk: int):
     print(">>>chaining model:", LLM_name)
-    retriever = vectorstore.as_retriever()
+    retriever = vectorstore.as_retriever(search_kwargs={"k": topk})
     llm = ChatOllama(model=LLM_name, temperature=0)
     template = """
                 Answer the question comprehensively and with detailed logical points based on the following context:
@@ -69,9 +69,10 @@ def setup_ollama_language_model_chain(vectorstore: Chroma, LLM_name: str):
     return rag_chain
 
 
-def setup_language_model_chain(vectorstore: Chroma):
+def setup_language_model_chain(vectorstore: Chroma, topk: int):
     print(">>>Setting up LLM chain...")
-    retriever = vectorstore.as_retriever()
+    retriever = vectorstore.as_retriever(search_kwargs={"k": topk})
+    print(topk)
     template = """
                 Answer the question comprehensively and with detailed logical points based on the following context:
                 {context}

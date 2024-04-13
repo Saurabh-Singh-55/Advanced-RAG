@@ -36,20 +36,32 @@ LOADER_MAPPING = {
 
 def load_single_document(file_path: str) -> List[Document]:
     """
-    Load a single document based on its file extension.
+    Load a single document based on its file extension, including file path in metadata.
 
     Parameters:
     - file_path: str, path to the file to be loaded.
 
     Returns:
-    - List[Document]: A list of Document objects loaded from the file.
+    - List[Document]: A list of Document objects loaded from the file, with metadata including the file path.
     """
     ext = "." + file_path.rsplit(".", 1)[-1].lower()
     if ext in LOADER_MAPPING:
         loader_class, loader_args = LOADER_MAPPING[ext]
         loader = loader_class(file_path, **loader_args)
-        return loader.load()
+        documents = loader.load()
+
+        # Add file path to metadata of each Document
+        for document in documents:
+            document.metadata = {'file_path': file_path}
+            # if 'metadata' in document.__dict__:  # Assuming the Document has a metadata attribute
+            #     document.metadata['file_path'] = file_path
+            # else:
+            #     document.metadata = {'file_path': file_path}  # Create metadata if it doesn't exist
+
+        return documents
+
     raise ValueError(f"Unsupported file extension '{ext}'")
+
 
     
 def load_documents(source_dir: str, ignored_files: List[str] = []) -> List[Document]:

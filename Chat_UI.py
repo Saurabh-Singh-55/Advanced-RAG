@@ -8,6 +8,8 @@ import openai
 import ollama
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_openai import OpenAI
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import CharacterTextSplitter
 from dotenv import load_dotenv
 load_dotenv()
 api_key = ''
@@ -45,7 +47,8 @@ def extract_pages(source_directory: str):
         Args: source_directory (str): The directory containing the files to be processed.
         Returns:list: A list of strings, each representing the content of a page from the extracted documents.
     """
-    print(f">>>Extracting from: {source_directory}...")
+    print("="*30)
+    print(f">>>Extracting from: {source_directory}")
 
     # Load documents using the function from AnyFile_loader.py
     documents = load_documents(source_directory)
@@ -55,12 +58,11 @@ def extract_pages(source_directory: str):
 
     # Extract page content from each document
     extracted_pages = [doc.page_content for doc in documents]
-
     print(f">>>Extracted {len(extracted_pages)} pages.")
     print("="*30)
-    return [text.replace("\n", " ") for text in extracted_pages]
+    return documents
 
-def create_store_embeddings(texts: List[str], chunk_size: int, chunk_overlap: int, level: int, n_levels: int):
+def create_store_embeddings(texts: List[str],documents: List[str], chunk_size: int, chunk_overlap: int, level: int, n_levels: int):
     """ Creates and stores embeddings from the provided texts.
         Args:
         texts (List[str]): The texts to process and create embeddings for.
@@ -75,36 +77,42 @@ def create_store_embeddings(texts: List[str], chunk_size: int, chunk_overlap: in
 
     # Call the function to build the vector store with summaries
     vectorstore_path = os.environ.get('VECTORSTORE_PATH', 'Vec_Store')
+    # st.write(texts)
+    text_splitter = RecursiveCharacterTextSplitter(
+        separators=["\n"],
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        keep_separator=False,
+    )
+    texts = text_splitter.create_documents(texts)
+    texts = [doc.page_content for doc in texts]
+    doc_splitter = CharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    docs = text_splitter.split_documents(documents)
     vectorstore = Chroma.from_texts(texts=texts, embedding=embd, persist_directory=vectorstore_path)
-
+    vectorstore = Chroma.from_documents(docs, embedding=embd, persist_directory=vectorstore_path)
     print(">>>Embeddings created and stored.")
+    print("="*30)
     return vectorstore
 
-def create_summary_tree(texts: List[str], chunk_size: int, chunk_overlap: int, level: int, n_levels: int):
-    """ Creates a summary tree for the given texts.
-        Args:
-        texts (List[str]): The texts to be summarized.
-        chunk_size (int): Size of the text chunk for processing.
-        chunk_overlap (int): Overlap size between chunks.
-        level (int): Starting level for processing.
-        n_levels (int): Number of levels for hierarchical processing.
-        Returns:
-        Dict: A dictionary representing the summary tree, with keys as levels and values as summaries.
-    """
-    print(">>>Creating summary tree...")
+def create_summary_tree(documents: List[str], chunk_size: int, chunk_overlap: int, level: int, n_levels: int) -> Dict:
+    print(">>> Creating summary tree...")
 
-    # Generate summaries using the recursive_embed_cluster_summarize function
+    extracted_pages = [doc.page_content for doc in documents]
+    texts = [text.replace("\n", " ") for text in extracted_pages]
+    # Assuming recursive_embed_cluster_summarize is correctly implemented and imported
     raptor_results = recursive_embed_cluster_summarize(
         texts,
         level=level,
         n_levels=n_levels
     )
-    all_texts = texts.copy()
+
+    all_texts = []
     for level in sorted(raptor_results.keys()):
         summaries = raptor_results[level][1]["summaries"].tolist()
         all_texts.extend(summaries)
 
-    print(">>>Summary tree created.")
+    print(">>> Summary tree created.")
+    print("="*30)
     return all_texts
 
 
@@ -153,7 +161,6 @@ with st.sidebar:
         # Extract the 'name' field from each model's details
         pulled_models = [model['name'] for model in list_response['models']]
         selected_model = st.sidebar.selectbox('Select a Model', list(reversed(pulled_models)))
-
     # Document Update and Processing Section
     st.markdown('---')
     st.subheader('Document Processing')
@@ -168,12 +175,24 @@ with st.sidebar:
                 with CapturePrints(log_callback=update_log):
                     st.session_state.total_pages = extract_pages(source_directory)
                 st.success("Documents loaded successfully.")
+        
+        col1, col2= st.columns([1,1])
+        with col1:
+            chunk_size = st.number_input("Chunk Size", min_value=100, max_value=1000, value=500, help='Size of text chunk for processing.')
+        with col2:
+            chunk_overlap = st.number_input("Chunk Overlap", min_value=0, max_value=100, value=50, help='Overlap size between chunks.')
+        col1, col2= st.columns([1,1])
+        with col1:
+            level = st.number_input("Level", min_value=1, max_value=5, value=1, help='Starting level for processing.')
+        with col2:
+            n_levels = st.number_input("Number of Levels", min_value=1, max_value=10, value=3, help='Number of levels for hierarchical processing.')
 
-        # Document processing settings
-        chunk_size = st.number_input("Chunk Size", min_value=100, max_value=1000, value=500, help='Size of text chunk for processing.')
-        chunk_overlap = st.number_input("Chunk Overlap", min_value=0, max_value=100, value=50, help='Overlap size between chunks.')
-        level = st.number_input("Level", min_value=1, max_value=5, value=1, help='Starting level for processing.')
-        n_levels = st.number_input("Number of Levels", min_value=1, max_value=10, value=3, help='Number of levels for hierarchical processing.')
+        # # Document processing settings
+        # chunk_size = st.number_input("Chunk Size", min_value=100, max_value=1000, value=500, help='Size of text chunk for processing.')
+        # chunk_overlap = st.number_input("Chunk Overlap", min_value=0, max_value=100, value=50, help='Overlap size between chunks.')
+        # level = st.number_input("Level", min_value=1, max_value=5, value=1, help='Starting level for processing.')
+        # n_levels = st.number_input("Number of Levels", min_value=1, max_value=10, value=3, help='Number of levels for hierarchical processing.')
+        
 
         if st.button("Create Summary Tree"):
             with CapturePrints(log_callback=update_log):
@@ -182,7 +201,7 @@ with st.sidebar:
 
         if st.button("Create and Store Embeddings"):
             with CapturePrints(log_callback=update_log):
-                st.session_state.vectorstore = create_store_embeddings(st.session_state.clusters, chunk_size, chunk_overlap, level, n_levels)
+                st.session_state.vectorstore = create_store_embeddings(st.session_state.clusters,st.session_state.total_pages, chunk_size, chunk_overlap, level, n_levels)
             st.success("Embeddings created and stored.")
             st.success('VectorStore is Loaded')
 
@@ -201,17 +220,11 @@ with st.sidebar:
 #################################################################################################################
 
 
-# Initialize the RAG chain if it doesn't exist
-    if llm_type == 'Local':
-        st.session_state.rag_chain = setup_ollama_language_model_chain(st.session_state.vectorstore, selected_model)
-    else:
-        st.session_state.rag_chain = setup_language_model_chain(st.session_state.vectorstore)
 
     
 #################################################################################################################    
 ##################################   Chat Interface    ##########################################################
 #################################################################################################################    
-
 
 # Initialize session state variables if they don't exist
 if 'messages' not in st.session_state:
@@ -240,12 +253,15 @@ with st.sidebar:
         with col2:
             st.button('New Session', on_click=new_session)
 
-if st.session_state.sessions:
-    session_index = st.selectbox('Select Previous Session', range(len(st.session_state.sessions)), format_func=lambda x: f"Session {x+1}")
-if st.button('Load Selected Session'):
-    st.session_state.messages = st.session_state.sessions[session_index].copy()
-    st.success("Loaded selected session")
-
+col1, col2= st.columns([1,1])
+with col1:
+    if st.session_state.sessions:
+        session_index = st.selectbox('Select Previous Session', range(len(st.session_state.sessions)), format_func=lambda x: f"Session {x+1}")
+    if st.button('Load Selected Session'):
+        st.session_state.messages = st.session_state.sessions[session_index].copy()
+        st.success("Loaded selected session")
+with col2:
+    st.session_state.topk = st.number_input("Top K Retrival", min_value=1, max_value=10, value=3, help='Number of chunks Retrieved')
 
 
 # Main chat interface logic
@@ -257,15 +273,31 @@ disable_chat = not (llm_type == 'API' and api_key_valid or llm_type == 'Local' a
 
 if not disable_chat:
     # Capture the user's input
+    
     if prompt := st.chat_input("Enter your question:", disabled=disable_chat):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
 
+    # Initialize the RAG chain if it doesn't exist
+    if llm_type == 'Local':
+        st.session_state.rag_chain = setup_ollama_language_model_chain(st.session_state.vectorstore, selected_model,topk=st.session_state.topk)
+    else:
+        st.session_state.rag_chain = setup_language_model_chain(st.session_state.vectorstore,topk=st.session_state.topk)
     # Generate a new response if the last message is not from the assistant
     if st.session_state.messages[-1]["role"] != "assistant":
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
+                retriever = st.session_state.vectorstore.as_retriever(search_kwargs={"k": st.session_state.topk})
+                docs = retriever.get_relevant_documents(prompt)
+                with st.expander("See Context"):
+                    for doc in docs:
+                        st.write(doc.page_content)
+                        file_path = doc.metadata.get('file_path', None)
+                        if file_path:
+                            st.markdown(f"**File Path:** `{file_path}`")
+                        else: 
+                            st.markdown(f"**File Path:** `{'Raptor Cluster Summary File'}`")
                 response = invoke_chain(st.session_state.rag_chain, prompt)
                 placeholder = st.empty()
                 full_response = ''
@@ -273,8 +305,7 @@ if not disable_chat:
                     full_response += item
                     placeholder.markdown(full_response)
                 placeholder.markdown(full_response)
-        
+            
         message = {"role": "assistant", "content": full_response}
         st.session_state.messages.append(message)
-
 
