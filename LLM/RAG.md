@@ -352,14 +352,16 @@ But wait, there's more! In addition to retrieving the relevant sentences, Senten
 ![QA systems differences](image-16.png)
 
 
-# **Evaluation[10]**
+# **Evaluation**
+
+Evaluation are taked from article[10]
 
 ![Eval-retrieval](image-21.png)
 
 ![Eval-similarity](image-22.png)
 
 
-## citation:
+## Citation:
 - [1] https://aws.amazon.com/what-is/retrieval-augmented-generation/
 
 - [2] https://github.com/langchain-ai/rag-from-scratch
