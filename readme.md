@@ -15,7 +15,12 @@
 - [Directions We Can Take](Directions.md)
 
 
-For more detailed strategic approaches and future directions for the Advanced-RAG project, see [Directions We Can Take](Directions.md).
+- For more detailed future directions, see [Directions We Can Take](Directions.md).
+
+- For more detailed on LLMs, see [LLM](LLM/LLM.md)
+
+- For more detailed on Advanced RAG approaches, see [RAG](LLM/RAG.md)
+
 
 # Advanced-RAG Setup Guide
 ![LLaMa Weights Memory Requirements](./Images/Current_Stack.png "Advance RAG chain")
