@@ -62,6 +62,35 @@ def extract_pages(source_directory: str):
     print("="*30)
     return documents
 
+def store_embeddings(documents: List[str], chunk_size: int, chunk_overlap: int, level: int, n_levels: int):
+    """ Creates and stores embeddings from the provided texts.
+        Args:
+        texts (List[str]): The texts to process and create embeddings for.
+        chunk_size (int): Size of the text chunk for processing.
+        chunk_overlap (int): Overlap size between chunks.
+        level (int): Starting level for processing.
+        n_levels (int): Number of levels for hierarchical processing.
+        Returns:
+        Chroma: The created vector store.
+    """
+    print(">>>Creating and storing embeddings...")
+
+    # Call the function to build the vector store with summaries
+    vectorstore_path = os.environ.get('VECTORSTORE_PATH', 'Vec_Store')
+    # st.write(texts)
+    text_splitter = RecursiveCharacterTextSplitter(
+        separators=["\n"],
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        keep_separator=False,
+    )
+    docs = text_splitter.split_documents(documents)
+    vectorstore = Chroma.from_documents(docs, embedding=embd, persist_directory=vectorstore_path)
+    print(">>>Raw Embeddings stored.")
+    print("="*30)
+    return vectorstore
+
+
 def create_store_embeddings(texts: List[str],documents: List[str], chunk_size: int, chunk_overlap: int, level: int, n_levels: int):
     """ Creates and stores embeddings from the provided texts.
         Args:
@@ -84,13 +113,9 @@ def create_store_embeddings(texts: List[str],documents: List[str], chunk_size: i
         chunk_overlap=chunk_overlap,
         keep_separator=False,
     )
-    texts = text_splitter.create_documents(texts)
-    texts = [doc.page_content for doc in texts]
-    doc_splitter = CharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     docs = text_splitter.split_documents(documents)
-    vectorstore = Chroma.from_texts(texts=texts, embedding=embd, persist_directory=vectorstore_path)
     vectorstore = Chroma.from_documents(docs, embedding=embd, persist_directory=vectorstore_path)
-    print(">>>Embeddings created and stored.")
+    print(">>>Summary Embeddings stored.")
     print("="*30)
     return vectorstore
 
@@ -193,13 +218,18 @@ with st.sidebar:
         # level = st.number_input("Level", min_value=1, max_value=5, value=1, help='Starting level for processing.')
         # n_levels = st.number_input("Number of Levels", min_value=1, max_value=10, value=3, help='Number of levels for hierarchical processing.')
         
+        if st.button("Store Embeddings"):
+            with CapturePrints(log_callback=update_log):
+                st.session_state.vectorstore = store_embeddings(st.session_state.total_pages, chunk_size, chunk_overlap, level, n_levels)
+            st.success("Embeddings stored.")
+            st.success('VectorStore is Loaded')
 
         if st.button("Create Summary Tree"):
             with CapturePrints(log_callback=update_log):
                 st.session_state.clusters = create_summary_tree(st.session_state.total_pages, chunk_size, chunk_overlap, level, n_levels)
             st.success("Summary tree created.")
 
-        if st.button("Create and Store Embeddings"):
+        if st.button("Store Summary Embeddings"):
             with CapturePrints(log_callback=update_log):
                 st.session_state.vectorstore = create_store_embeddings(st.session_state.clusters,st.session_state.total_pages, chunk_size, chunk_overlap, level, n_levels)
             st.success("Embeddings created and stored.")
